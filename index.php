@@ -137,6 +137,12 @@ else if ($_GET['query'] === "create")
         die();
     }
 
+    if (!isset($_GET['key']) || $_GET['key'] != CREATE_KEY)
+    {
+        echo "Invalid request.";
+        die();
+    }
+
     Stock::createStock($_GET['symbol'], $_GET['name']);
 
     $url = strtok($_SERVER["REQUEST_URI"],'?');
