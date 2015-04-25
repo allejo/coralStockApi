@@ -6,9 +6,6 @@ require "Seed.php";
 require "Stock.php";
 
 $db = Database::getInstance();
-$seed = Seed::getSeed();
-
-mt_srand($seed);
 
 $nasdaq_url = "ftp://ftp.nasdaqtrader.com/symboldirectory/nasdaqlisted.txt";
 $nyse_url = "http://www.nasdaq.com/screening/companies-by-name.aspx?letter=0&exchange=nyse&render=download";

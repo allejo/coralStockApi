@@ -189,6 +189,8 @@ class Stock
             return;
         }
 
+        mt_srand(Seed::getSeed());
+
         $dbc = Database::getInstance();
         $startingPrice = mt_rand(22, 78) + self::getDecimal();
 
