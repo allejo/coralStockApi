@@ -81,6 +81,8 @@ class Stock
 
     public function getTrades()
     {
+        $this->catchUpWithStocks();
+
         $sql = "SELECT * FROM `values` WHERE `date` >= (NOW() - interval 366 day) AND stock = ?";
         $trades = $this->db->prepare($sql);
         $trades->execute(array($this->id));
@@ -111,6 +113,21 @@ class Stock
         $stmt->execute(array($this->getID(), $date, $this->getClosingPrice(), $close));
 
         $this->setClosingPrice($close);
+    }
+
+    private function catchUpWithStocks()
+    {
+        $sql = "SELECT `date` FROM `values` WHERE `stock` = ? ORDER BY `date` DESC LIMIT 1";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(array($this->getID()));
+
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $date = $rows[0]['date'];
+
+        if ($date != date("Y-m-d", time()))
+        {
+            self::stockLoop($this, $date, date("Y-m-d", time()));
+        }
     }
 
     // Inverse ncdf approximation by Peter John Acklam, implementation adapted to
@@ -206,12 +223,7 @@ class Stock
         $date = date("Y-m-d", $yearAgo);
         $end_date = date("Y-m-d", time());
 
-        while (strtotime($date) <= strtotime($end_date))
-        {
-            $Stock->setClosePrice($date);
-
-            $date = date ("Y-m-d", strtotime("+1 day", strtotime($date)));
-        }
+        self::stockLoop($Stock, $date, $end_date);
     }
 
     public static function getStocks()
@@ -235,5 +247,15 @@ class Stock
         }
 
         return $coral_exchange;
+    }
+
+    private static function stockLoop($stock, $date, $end_date)
+    {
+        while (strtotime($date) <= strtotime($end_date))
+        {
+            $stock->setClosePrice($date);
+
+            $date = date ("Y-m-d", strtotime("+1 day", strtotime($date)));
+        }
     }
 }
